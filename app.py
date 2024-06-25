@@ -1,5 +1,5 @@
-from flask import Flask, jsonify
-from flask_socketio import SocketIO
+from flask import Flask, render_template
+from flask_socketio import SocketIO, emit
 from repository.database import db
 
 app = Flask(__name__)
@@ -10,10 +10,16 @@ db.init_app(app)
 socketio = SocketIO(app)
 
 
-@app.route('/initial', methods=['GET'])
-def initial_route():
-    return jsonify({'message': 'Initial route'})
+@app.route('/', methods=['GET'])
+def index():
+    return render_template('index.html')
+
+
+@socketio.on('message')
+def handle_message(data):
+    print('received message: ' + data)
+    emit('message', data, broadcast=True)
 
 
 if __name__ == '__main__':
-    socketio.run(app)
+    socketio.run(app, debug=True)
